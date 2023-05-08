@@ -11,4 +11,5 @@ from user import views
 urlpatterns = [
     path('', views.UserSignup.as_view(), name='sign_up'),
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('<int:user_id>/follow', views.FollowView.as_view(), name='follow'),
 ]
