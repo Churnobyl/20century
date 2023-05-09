@@ -38,11 +38,11 @@ class User(AbstractBaseUser):
     name = models.CharField(max_length=10)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    point = models.PositiveIntegerField(default=0)  # 얘 어쩌지?
-    
+    point = models.PositiveIntegerField(default=0)
+
     # 팔로우
     followings = models.ManyToManyField('self', symmetrical=False, related_name="followers", blank=True, null=True, verbose_name="팔로워")
-    
+
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
