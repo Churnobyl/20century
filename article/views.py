@@ -9,6 +9,7 @@ from article.serializers import (
     ArticleCreateSerializer,
     ArticleUpdateSerializer,
 )
+from article.serializers import BookmarkSerializer
 
 
 class ArticleView(APIView):
@@ -46,3 +47,19 @@ class ArticleDetailView(APIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response("권한이 없습니다.", status=status.HTTP_403_FORBIDDEN)
+        
+
+class BookmarkView(APIView):
+    def get(self, request, article_id):
+        article = get_object_or_404(Article, id=article_id)
+        serializer = BookmarkSerializer(article)
+        return Response(serializer.data)
+    
+    def post(self, request, article_id):
+        article = get_object_or_404(Article, id=article_id)
+        if request.user in article.bookmarked.all():
+            article.bookmarked.remove(request.user)
+            return Response({"message": "북마크에서 삭제했습니다."}, status=status.HTTP_202_ACCEPTED)
+        else:
+            article.bookmarked.add(request.user)
+            return Response({"message": "북마크에 추가했습니다."}, status=status.HTTP_200_OK)

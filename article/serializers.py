@@ -34,3 +34,13 @@ class ArticleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ("pk", "title", "user", "finished_at")
+
+
+class BookmarkSerializer(serializers.ModelSerializer):
+    bookmarked = serializers.StringRelatedField(many=True)
+
+    class Meta:
+        model = Article
+        fields = [
+            'bookmarked',
+        ]
