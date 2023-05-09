@@ -35,14 +35,14 @@ class User(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
-    name = models.CharField(max_length=10)
+    name = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     point = models.PositiveIntegerField(default=0)
 
     # 팔로우
     followings = models.ManyToManyField('self', symmetrical=False, related_name="followers", blank=True, verbose_name="팔로워")
-
+    
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
