@@ -41,7 +41,7 @@ class User(AbstractBaseUser):
     point = models.PositiveIntegerField(default=0)
 
     # 팔로우
-    followings = models.ManyToManyField('self', symmetrical=False, related_name="followers", blank=True, null=True, verbose_name="팔로워")
+    followings = models.ManyToManyField('self', symmetrical=False, related_name="followers", blank=True, verbose_name="팔로워")
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
