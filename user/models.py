@@ -40,6 +40,9 @@ class User(AbstractBaseUser):
     updated_at = models.DateTimeField(auto_now=True)
     point = models.PositiveIntegerField(default=0)
 
+    # 팔로우
+    followings = models.ManyToManyField('self', symmetrical=False, related_name="followers", blank=True, null=True, verbose_name="팔로워")
+
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
@@ -49,7 +52,7 @@ class User(AbstractBaseUser):
     REQUIRED_FIELDS = ["point", "name"]
 
     def __str__(self):
-        return self.email
+        return str(self.name)
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
