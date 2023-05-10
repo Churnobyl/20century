@@ -11,11 +11,12 @@ from article.serializers import (
     CommentSerializer,
 )
 from article.serializers import BookmarkSerializer
+from rest_framework.generics import ListAPIView
 
 
 class ArticleView(APIView):
     def get(self, request):
-        articles = Article.objects.all()
+        articles = Article.objects.all().order_by('-created_at')
         serializer = ArticleListSerializer(articles, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

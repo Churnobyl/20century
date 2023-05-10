@@ -46,7 +46,11 @@ EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/' # 사이트와 관련한 자
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
 # 이메일에 자동으로 표시되는 사이트 정보
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[20 Century]"
+REST_USE_JWT = True
 SITE_ID = 1
+
+## 이메일 인증 잠깐 꺼놓기
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 
 
@@ -78,7 +82,9 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 8,
 }
 
 MIDDLEWARE = [
