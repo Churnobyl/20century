@@ -2,14 +2,15 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import status, permissions
 from rest_framework.response import Response
-from article.models import Article, Comment
+from article.models import Article, Comment, Product, Bid
 from article.serializers import (
     ArticleSerializer,
     ArticleListSerializer,
     ArticleCreateSerializer,
     ArticleUpdateSerializer,
     CommentSerializer,
-    ProductSerializer
+    ProductSerializer,
+    BidCreateSerializer
 )
 from article.serializers import BookmarkSerializer
 
@@ -23,14 +24,17 @@ class ArticleView(APIView):
     def post(self, request):
         article_serializer = ArticleCreateSerializer(data=request.data)
         product_serializer = ProductSerializer(data=request.data)
-        if article_serializer.is_valid() and product_serializer.is_valid():
+        bid_serializer = BidCreateSerializer(data=request.data)
+        if article_serializer.is_valid() and product_serializer.is_valid() and bid_serializer.is_valid():
             article_serializer.save(user=request.user)
             product_serializer.save()
-            return Response({'article': article_serializer.data, 'product': product_serializer.data}, status=status.HTTP_200_OK)
+            bid_serializer.save()
+            return Response({'article': article_serializer.data, 'product': product_serializer.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
         else:
             errors = {}
             errors.update(article_serializer.errors)
             errors.update(product_serializer.errors)
+            errors.update(bid_serializer.errors)
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
         

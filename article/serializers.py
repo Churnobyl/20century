@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from article.models import Article, Comment, Product
+from article.models import Article, Comment, Product, Bid
 
 
 class ArticleSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
 
     def get_user(self, obj):
-        return obj.user.name
+        return obj.user.username
 
     class Meta:
         model = Article
@@ -29,7 +29,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
 
     def get_user(self, obj):
-        return obj.user.name
+        return obj.user.username
 
     class Meta:
         model = Article
@@ -39,6 +39,17 @@ class ArticleListSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
+        fields = "__all__"
+
+
+class BidCreateSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+
+    def get_user(self, obj):
+        return obj.user.username
+
+    class Meta:
+        model = Bid
         fields = "__all__"
 
 
