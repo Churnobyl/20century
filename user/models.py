@@ -45,6 +45,9 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+    class Meta:
+        db_table = "user"
+    
     email = models.EmailField(
         verbose_name="email address",
         max_length=255,

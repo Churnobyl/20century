@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from article.models import Article, Comment
+from article.models import Article, Comment, Product
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -34,6 +34,12 @@ class ArticleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ("pk", "title", "user", "finished_at")
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = "__all__"
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
