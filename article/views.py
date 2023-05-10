@@ -13,12 +13,44 @@ from article.serializers import (
     BidCreateSerializer
 )
 from article.serializers import BookmarkSerializer
+from rest_framework.pagination import PageNumberPagination
+
+class ArticlePagination(PageNumberPagination):
+    page_size = 6
 
 
 class ArticleView(APIView):
+    pagination_class = ArticlePagination
+    serializer_class = ArticleListSerializer
+    @property
+    def paginator(self):
+        if not hasattr(self, '_paginator'):
+            if self.pagination_class is None:
+                self._paginator = None
+            else:
+                self._paginator = self.pagination_class()
+        else:
+            pass
+        return self._paginator
+    
+    def paginate_queryset(self, queryset):
+        
+        if self.paginator is None:
+            return None
+        return self.paginator.paginate_queryset(queryset,
+                   self.request, view=self)
+        
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+    
     def get(self, request):
-        articles = Article.objects.all()
-        serializer = ArticleListSerializer(articles, many=True)
+        articles = Article.objects.all().order_by('-created_at')
+        page = self.paginate_queryset(articles)
+        if page is not None:
+            serializer = self.get_paginated_response(self.serializer_class(page, many=True).data)
+        else:
+            serializer = self.serializer_class(articles, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
