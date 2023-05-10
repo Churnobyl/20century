@@ -34,15 +34,7 @@ class ConfirmEmailView(APIView):
         qs = EmailConfirmation.objects.all_valid()
         qs = qs.select_related("email_address__user")
         return qs
-
-class UserSignup(APIView):
-    # 회원 가입
-    def post(self, request):
-        serialize = UserSerializer(data=request.data)
-        if serialize.is_valid(raise_exception=True):
-            serialize.save()
-            return Response({'message': '가입완료'}, status=status.HTTP_201_CREATED)
-        
+ 
 class UserDetailView(APIView):
     def get(self, request, user_id):
         user = User.objects.get(id=user_id)
