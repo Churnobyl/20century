@@ -9,6 +9,7 @@ from article.serializers import (
     ArticleCreateSerializer,
     ArticleUpdateSerializer,
     CommentSerializer,
+    ProductSerializer
 )
 from article.serializers import BookmarkSerializer
 
@@ -20,12 +21,17 @@ class ArticleView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = ArticleCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        article_serializer = ArticleCreateSerializer(data=request.data)
+        product_serializer = ProductSerializer(data=request.data)
+        if article_serializer.is_valid() and product_serializer.is_valid():
+            article_serializer.save(user=request.user)
+            product_serializer.save()
+            return Response({'article': article_serializer.data, 'product': product_serializer.data}, status=status.HTTP_200_OK)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            errors = {}
+            errors.update(article_serializer.errors)
+            errors.update(product_serializer.errors)
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
         
 class ArticleDetailView(APIView):
@@ -35,9 +41,9 @@ class ArticleDetailView(APIView):
             serializer = ArticleSerializer(article)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response("권한이 없습니다.", status=status.HTTP_403_FORBIDDEN)
+            return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
 
-    def put(self, request, article_id):
+    def patch(self, request, article_id):
         article = get_object_or_404(Article, id=article_id)
         if request.user == article.user:
             serializer = ArticleUpdateSerializer(article, data=request.data)
@@ -47,7 +53,8 @@ class ArticleDetailView(APIView):
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response("권한이 없습니다.", status=status.HTTP_403_FORBIDDEN)
+            return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+        
         
 class BookmarkView(APIView):
     def get(self, request, article_id):
