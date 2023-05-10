@@ -26,3 +26,11 @@ urlpatterns = [
     # 유저가 클릭한 이메일(=링크) 확인
     re_path(r'^account-confirm-email/(?P<key>[-:\w]+)/$', ConfirmEmailView.as_view(), name='account_confirm_email'),
 ]
+
+# api/user/ dj-rest-auth/ password/reset/ [name='rest_password_reset']
+# api/user/ dj-rest-auth/ password/reset/confirm/ [name='rest_password_reset_confirm']
+# api/user/ dj-rest-auth/ login/ [name='rest_login']
+# api/user/ dj-rest-auth/ logout/ [name='rest_logout']
+# api/user/ dj-rest-auth/ user/ [name='rest_user_details']
+# api/user/ dj-rest-auth/ password/change/ [name='rest_password_change']
+# api/user/ dj-rest-auth/registration/

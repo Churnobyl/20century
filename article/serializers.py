@@ -6,7 +6,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
 
     def get_user(self, obj):
-        return obj.user.name
+        return obj.user.username
 
     class Meta:
         model = Article
@@ -29,7 +29,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
 
     def get_user(self, obj):
-        return obj.user.name
+        return obj.user.username
 
     class Meta:
         model = Article
