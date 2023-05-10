@@ -31,6 +31,15 @@ class Product(models.Model):
     def __str__(self):
         return str(self.name)
     
+    
+class Bid(models.Model):
+    class Meta:
+        db_table = "bid"
+        
+    user = models.ForeignKey(User, null=True, default=None, on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    max_point = models.IntegerField(default=0)
+    
 
 class Comment(models.Model):
     
