@@ -1,5 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+import os
+from uuid import uuid4
+from datetime import date
+
+# 프로필 파일 이름 uuid형식으로 바꾸기
+def rename_imagefile_to_uuid(instance, filename):
+    now = date.today()
+    upload_to = f'profile/{now.year}/{now.month}/{now.day}/{instance}'
+    ext = filename.split('.')[-1]
+    uuid = uuid4().hex
+    
+    if instance:
+        filename = '{}_{}.{}'.format(uuid, instance, ext)
+    else:
+        filename = '{}.{}'.format(uuid, ext)
+    return os.path.join(upload_to, filename)
 
 
 class UserManager(BaseUserManager):
@@ -41,6 +57,9 @@ class User(AbstractBaseUser):
 
     # 팔로우
     followings = models.ManyToManyField('self', symmetrical=False, related_name="followers", blank=True, verbose_name="팔로워")
+    
+    # 프로필 사진
+    profile_image = models.ImageField(null=True, upload_to=rename_imagefile_to_uuid, storage=None, verbose_name="프로필 사진")
     
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
