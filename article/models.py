@@ -43,8 +43,8 @@ class Bid(models.Model):
     class Meta:
         db_table = "bid"
         
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, default=1, on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, default=1, on_delete=models.CASCADE)
     max_point = models.IntegerField(default=0)
     
 
