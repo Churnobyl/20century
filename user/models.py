@@ -3,25 +3,24 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, name, point, password=None):
+    def create_user(self, email, username, point, password=None):
         if not email:
             raise ValueError("Users must have an email address")
 
         user = self.model(
             email=self.normalize_email(email),
-            name=name,
+            username=username,
             point=point,
         )
-
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, name, point, password=None):
+    def create_superuser(self, email, username, point, password=None):
         user = self.create_user(
             email,
             password=password,
-            name=name,
+            username=username,
             point=point,
         )
         user.is_admin = True
@@ -35,7 +34,7 @@ class User(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
-    name = models.CharField(max_length=100, unique=True)
+    username = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     point = models.PositiveIntegerField(default=0)
@@ -49,10 +48,10 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["point", "name"]
+    REQUIRED_FIELDS = ["point", "username"]
 
     def __str__(self):
-        return str(self.name)
+        return str(self.username)
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
