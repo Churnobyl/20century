@@ -21,8 +21,8 @@ urlpatterns = [
     # 비번 변경
     # http://127.0.0.1:8000/api/user/account/password_reset/
     path('account/', include('django.contrib.auth.urls')),
-    # 일반 회원 회원가입
-    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
+    # 일반 회원 회원가입/로그인
+    path('dj-rest-auth/registration/', views.CustomRegisterView.as_view(), name='register'),
     # 유효한 이메일이 유저에게 전달
     re_path(r'^account-confirm-email/$', VerifyEmailView.as_view(), name='account_email_verification_sent'),
     # 유저가 클릭한 이메일(=링크) 확인
