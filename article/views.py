@@ -52,7 +52,7 @@ class ArticleView(APIView):
         else:
             serializer = self.serializer_class(articles, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
+    
     def post(self, request):
         article_serializer = ArticleCreateSerializer(data=request.data)
         product_serializer = ProductSerializer(data=request.data)
@@ -60,6 +60,9 @@ class ArticleView(APIView):
         if article_serializer.is_valid() and product_serializer.is_valid() and bid_serializer.is_valid():
             article_serializer.save(user=request.user)
             product_serializer.save()
+            product_id = product_serializer.instance.id
+            product = get_object_or_404(Product, id=product_id)
+            bid_serializer.validated_data['product'] = product
             bid_serializer.save()
             return Response({'article': article_serializer.data, 'product': product_serializer.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
         else:
