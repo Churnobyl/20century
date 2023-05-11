@@ -1,6 +1,21 @@
 from django.db import models
 from user.models import User
+import os
+from uuid import uuid4
+from datetime import date
 
+# 프로필 파일 이름 uuid형식으로 바꾸기
+def rename_imagefile_to_uuid(instance, filename):
+    now = date.today()
+    upload_to = f'article/{now.year}/{now.month}/{now.day}/{instance}'
+    ext = filename.split('.')[-1]
+    uuid = uuid4().hex
+    
+    if instance:
+        filename = '{}_{}.{}'.format(uuid, instance, ext)
+    else:
+        filename = '{}.{}'.format(uuid, ext)
+    return os.path.join(upload_to, filename)
 
 class Article(models.Model):
     class Meta:
@@ -20,6 +35,9 @@ class Article(models.Model):
         ('D','잡화')
     ]
     category = models.CharField(choices=category_choice, max_length=1)
+    
+    # 아티클
+    image = models.ImageField(null=True, upload_to=rename_imagefile_to_uuid, verbose_name="제품 사진")
     
     # 북마크
     bookmarked = models.ManyToManyField(User, symmetrical=False, related_name="bookmark", blank=True, verbose_name="북마크")

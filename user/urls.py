@@ -7,6 +7,8 @@ from rest_framework_simplejwt.views import (
 from dj_rest_auth.registration.views import VerifyEmailView
 from user import views
 from user.views import ConfirmEmailView
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 
@@ -26,6 +28,8 @@ urlpatterns = [
     # 유저가 클릭한 이메일(=링크) 확인
     re_path(r'^account-confirm-email/(?P<key>[-:\w]+)/$', ConfirmEmailView.as_view(), name='account_confirm_email'),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
 
 # api/user/ dj-rest-auth/ password/reset/ [name='rest_password_reset']
 # api/user/ dj-rest-auth/ password/reset/confirm/ [name='rest_password_reset_confirm']
