@@ -3,6 +3,8 @@ from user.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    profile_image = serializers.ImageField()
+
     class Meta:
         model = User
         exclude = ['point', 'followings', ]

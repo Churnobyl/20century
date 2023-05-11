@@ -4,6 +4,7 @@ from article.models import Article, Comment, Product, Bid
 
 class ArticleSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
+    image = serializers.ImageField()
 
     def get_user(self, obj):
         return obj.user.username
@@ -14,9 +15,11 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField()
+
     class Meta:
         model = Article
-        fields = ["title", "content", "finished_at", "category"]
+        fields = ["title", "content", "finished_at", "category", 'image']
 
 
 class ArticleUpdateSerializer(serializers.ModelSerializer):
