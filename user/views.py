@@ -7,6 +7,14 @@ from user.models import User
 from django.http import HttpResponseRedirect
 from rest_framework.permissions import AllowAny
 from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
+from dj_rest_auth.registration.views import RegisterView
+from rest_framework import permissions
+from user.serializers import UserSerializer
+
+class CustomRegisterView(RegisterView):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.AllowAny]
+    
 
 
 class ConfirmEmailView(APIView):
