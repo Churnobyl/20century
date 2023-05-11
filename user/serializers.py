@@ -1,11 +1,24 @@
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from user.models import User
+from dj_rest_auth.registration.serializers import RegisterSerializer
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(RegisterSerializer, serializers.ModelSerializer):
+
+    profile_image = serializers.ImageField()
+
     class Meta:
         model = User
-        exclude = ['point', 'followings', ]
+        fields = ['email',
+                  'username',
+                  'created_at',
+                  'updated_at',
+                  'profile_image',
+                  'password1',
+                  'password2',
+                  ]
+        # exclude = ['point', 'followings', ]
         extra_kwargs = {
             "password": {
                 "write_only": True,
@@ -26,6 +39,13 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+    def custom_signup(self, request, user: User):
+        for field in self.Meta.fields:
+            if hasattr(user, field) and not getattr(user, field):
+                setattr(user, field, self.initial_data[field])
+
+        user.save()
+
 
 class UserPointSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,3 +63,14 @@ class FollowSerializer(serializers.ModelSerializer):
             'followings',
             'followers'
         ]
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['email'] = user.email
+        token['username'] = user.username
+        token['point'] = user.point
+
+        return token
