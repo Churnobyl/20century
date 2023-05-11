@@ -1,12 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from user.serializers import UserSerializer, FollowSerializer, UserPointSerializer
+from user.serializers import UserSerializer, FollowSerializer, UserPointSerializer, CustomTokenObtainPairSerializer
 from rest_framework.generics import get_object_or_404
 from user.models import User
 from django.http import HttpResponseRedirect
 from rest_framework.permissions import AllowAny
 from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 
 class ConfirmEmailView(APIView):
@@ -95,3 +96,6 @@ class FollowView(APIView):
         else:
             you.followers.add(me)
             return Response("follow했습니다.", status=status.HTTP_200_OK)
+        
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
