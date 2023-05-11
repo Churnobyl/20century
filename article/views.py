@@ -2,18 +2,19 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import status, permissions
 from rest_framework.response import Response
-from article.models import Article, Comment, Product, Bid
+from article.models import Article, Comment, Bid
 from article.serializers import (
     ArticleSerializer,
     ArticleListSerializer,
     ArticleCreateSerializer,
     ArticleUpdateSerializer,
     CommentSerializer,
-    ProductSerializer,
     BidCreateSerializer
 )
 from article.serializers import BookmarkSerializer
 from rest_framework.pagination import PageNumberPagination
+import pytz
+import datetime
 
 class ArticlePagination(PageNumberPagination):
     page_size = 6
@@ -55,20 +56,17 @@ class ArticleView(APIView):
     
     def post(self, request):
         article_serializer = ArticleCreateSerializer(data=request.data)
-        product_serializer = ProductSerializer(data=request.data)
         bid_serializer = BidCreateSerializer(data=request.data)
-        if article_serializer.is_valid() and product_serializer.is_valid() and bid_serializer.is_valid():
+        if article_serializer.is_valid() and bid_serializer.is_valid():
             article_serializer.save(user=request.user)
-            product_serializer.save()
-            product_id = product_serializer.instance.id
-            product = get_object_or_404(Product, id=product_id)
-            bid_serializer.validated_data['product'] = product
+            article_id = article_serializer.instance.id
+            article = get_object_or_404(Article, id=article_id)
+            bid_serializer.validated_data['article'] = article
             bid_serializer.save()
-            return Response({'article': article_serializer.data, 'product': product_serializer.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
+            return Response({'article': article_serializer.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
         else:
             errors = {}
             errors.update(article_serializer.errors)
-            errors.update(product_serializer.errors)
             errors.update(bid_serializer.errors)
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
@@ -150,3 +148,28 @@ class CommentDetailView(APIView):
             return Response({'message':'댓글 삭제 완료'}, status=status.HTTP_200_OK)
         else:
             return Response({'error':'권한이 없습니다!'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        
+        
+# def close_auction():
+#     time_zone = pytz.timezone('Asia/Seoul')
+#     current_time = datetime.now(time_zone)
+#     articles = Article.objects.all()
+#     response_data = []
+    
+#     for article in articles:
+#         if article.finished_at > current_time:
+#             pk = article.id
+#             product = get_object_or_404(Product, id=pk)
+#             serializer = ProductUpdateSerializer(product)
+#             if serializer.is_valid():
+#                 product.progress = False
+#                 serializer.save()
+#                 response_data.append(serializer.data)
+#             else:
+#                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#     if response_data:
+#         return Response(response_data, status=status.HTTP_200_OK)
+#     else:
+#         return Response({"message": "종료된 경매가 없습니다."}, status=status.HTTP_200_OK)
