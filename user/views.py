@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from rest_framework.permissions import AllowAny
 from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
 
+
 class ConfirmEmailView(APIView):
     permission_classes = [AllowAny]
 
@@ -34,6 +35,7 @@ class ConfirmEmailView(APIView):
         qs = EmailConfirmation.objects.all_valid()
         qs = qs.select_related("email_address__user")
         return qs
+ 
  
 class UserDetailView(APIView):
     def get(self, request, user_id):
