@@ -1,3 +1,4 @@
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from user.models import User
 from dj_rest_auth.registration.serializers import RegisterSerializer
@@ -62,3 +63,14 @@ class FollowSerializer(serializers.ModelSerializer):
             'followings',
             'followers'
         ]
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['email'] = user.email
+        token['username'] = user.username
+        token['point'] = user.point
+
+        return token
