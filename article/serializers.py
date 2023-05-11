@@ -16,13 +16,13 @@ class ArticleSerializer(serializers.ModelSerializer):
 class ArticleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ("title", "content", "finished_at")
+        fields = ["title", "content", "finished_at", "category"]
 
 
 class ArticleUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ("title", "content")
+        fields = ["title", "content", "category"]
 
 
 class ArticleListSerializer(serializers.ModelSerializer):
@@ -33,7 +33,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ("pk", "title", "user", "finished_at")
+        fields = ["pk", "title", "user", "finished_at"]
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -43,11 +43,6 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class BidCreateSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
-
-    def get_user(self, obj):
-        return obj.user.username
-
     class Meta:
         model = Bid
         fields = "__all__"
