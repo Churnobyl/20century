@@ -68,6 +68,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework',
 
+    # 'django_crontab',
+    # "django_apscheduler",
+    
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -214,3 +217,12 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+# CRONJOBS = [
+#     ('* * * * *', 'article.cron.close_auction')
+# ]
+
+
+# APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+# APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
+# SCHEDULER_DEFAULT = True
