@@ -29,8 +29,6 @@ urlpatterns = [
     re_path(r'^account-confirm-email/(?P<key>[-:\w]+)/$', ConfirmEmailView.as_view(), name='account_confirm_email'),
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
-
 # api/user/ dj-rest-auth/ password/reset/ [name='rest_password_reset']
 # api/user/ dj-rest-auth/ password/reset/confirm/ [name='rest_password_reset_confirm']
 # api/user/ dj-rest-auth/ login/ [name='rest_login']

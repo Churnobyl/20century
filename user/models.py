@@ -62,7 +62,7 @@ class User(AbstractBaseUser):
     followings = models.ManyToManyField('self', symmetrical=False, related_name="followers", blank=True, verbose_name="팔로워")
     
     # 프로필 사진
-    profile_image = models.ImageField(null=True, upload_to=rename_imagefile_to_uuid, storage=None, verbose_name="프로필 사진")
+    profile_image = models.ImageField(null=True, blank=True, upload_to=rename_imagefile_to_uuid, storage=None, verbose_name="프로필 사진")
     
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)

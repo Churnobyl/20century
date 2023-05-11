@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from article.models import Article, Comment, Product, Bid
+from article.models import Article, Comment, Bid
+from django.utils import timezone
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -16,10 +17,12 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
     image = serializers.ImageField()
+    finished_at = serializers.DateTimeField()
 
     class Meta:
         model = Article
-        fields = ["title", "content", "finished_at", "category", 'image']
+        fields = ["title", "content", "finished_at",
+                  "category", 'image', 'name']
 
 
 class ArticleUpdateSerializer(serializers.ModelSerializer):
@@ -37,12 +40,6 @@ class ArticleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ["pk", "title", "user", "finished_at"]
-
-
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = "__all__"
 
 
 class BidCreateSerializer(serializers.ModelSerializer):
@@ -65,3 +62,11 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ["content",]
+
+
+class BiddingSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Bid
+        fields = ['user', 'max_point']

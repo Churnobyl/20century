@@ -2,18 +2,20 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import status, permissions
 from rest_framework.response import Response
-from article.models import Article, Comment, Product, Bid
+from article.models import Article, Comment, Bid
 from article.serializers import (
     ArticleSerializer,
     ArticleListSerializer,
     ArticleCreateSerializer,
     ArticleUpdateSerializer,
     CommentSerializer,
-    ProductSerializer,
-    BidCreateSerializer
+    BidCreateSerializer,
+    BookmarkSerializer,
+    BiddingSerializer,
 )
-from article.serializers import BookmarkSerializer
 from rest_framework.pagination import PageNumberPagination
+from django.utils import timezone
+from rest_framework.permissions import IsAuthenticated
 
 class ArticlePagination(PageNumberPagination):
     page_size = 6
@@ -45,7 +47,8 @@ class ArticleView(APIView):
         return self.paginator.get_paginated_response(data)
     
     def get(self, request):
-        articles = Article.objects.all().order_by('-created_at')
+        # 경매종료시간이 남은 테이블만 보여주기
+        articles = Article.objects.filter(finished_at__gte=timezone.now()).order_by('-created_at')
         page = self.paginate_queryset(articles)
         if page is not None:
             serializer = self.get_paginated_response(self.serializer_class(page, many=True).data)
@@ -54,21 +57,17 @@ class ArticleView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
+        # 경매종료시간 finished_at의 request를 정수형으로 받고 현재시간에 더해서 저장
+        request.data['finished_at'] = timezone.now() + timezone.timedelta(days=int(request.data['finished_at']))
         article_serializer = ArticleCreateSerializer(data=request.data)
-        product_serializer = ProductSerializer(data=request.data)
         bid_serializer = BidCreateSerializer(data=request.data)
-        if article_serializer.is_valid() and product_serializer.is_valid() and bid_serializer.is_valid():
+        if article_serializer.is_valid()  and bid_serializer.is_valid():
             article_serializer.save(user=request.user)
-            product_serializer.save()
-            product_id = product_serializer.instance.id
-            product = get_object_or_404(Product, id=product_id)
-            bid_serializer.validated_data['product'] = product
             bid_serializer.save()
-            return Response({'article': article_serializer.data, 'product': product_serializer.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
+            return Response({'article': article_serializer.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
         else:
             errors = {}
             errors.update(article_serializer.errors)
-            errors.update(product_serializer.errors)
             errors.update(bid_serializer.errors)
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
@@ -93,6 +92,15 @@ class ArticleDetailView(APIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+
+class BiddingView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def patch(self, request, article_id):
+        article = get_object_or_404(Article, id=article_id)
+        serializer = BiddingSerializer(article, user=request.user, data=request.data)
+        
+        
         
         
 class BookmarkView(APIView):
