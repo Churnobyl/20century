@@ -20,5 +20,5 @@ urlpatterns = [
         "<int:article_id>/comment/<int:comment_id>/",
         views.CommentDetailView.as_view(),
         name="comment_detail_view",
-    ),    
+    ),
 ]

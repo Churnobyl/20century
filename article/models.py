@@ -12,7 +12,6 @@ class Article(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     finished_at = models.DateTimeField()
-    max_user = models.ForeignKey(User, null=True, default=None, on_delete=models.DO_NOTHING,related_name="max_user")
     category_choice = [
         ('A','일렉츄로닉'),
         ('B','패숑'),
@@ -20,6 +19,9 @@ class Article(models.Model):
         ('D','잡화')
     ]
     category = models.CharField(choices=category_choice, max_length=1)
+    product = models.CharField(max_length=100)
+    progress = models.BooleanField(default=True)
+    max_user = models.ForeignKey(User, null=True, default=None, on_delete=models.DO_NOTHING,related_name="max_user")
     
     # 북마크
     bookmarked = models.ManyToManyField(User, symmetrical=False, related_name="bookmark", blank=True, verbose_name="북마크")
@@ -28,28 +30,28 @@ class Article(models.Model):
         return str(self.title)
     
 
-class Product(models.Model):
-    class Meta:
-        db_table = "product"
+# class Product(models.Model):
+#     class Meta:
+#         db_table = "product"
         
-    name = models.CharField(max_length=100)
-    progress = models.BooleanField(default=True)
+#     name = models.CharField(max_length=100)
+#     progress = models.BooleanField(default=True)
 
-    def __str__(self):
-        return str(self.name)
+#     def __str__(self):
+#         return str(self.name)
     
     
 class Bid(models.Model):
     class Meta:
         db_table = "bid"
     
-    product = models.OneToOneField(Product, null=True, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, null=True, on_delete=models.PROTECT)
     user = models.ForeignKey(User, null=True, on_delete=models.PROTECT)
     max_point = models.IntegerField(default=0)
     
 
 class Comment(models.Model):
-    
+
     class Meta:
         db_table = "comment"
     
