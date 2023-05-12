@@ -10,8 +10,7 @@ from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
 from rest_framework_simplejwt.views import TokenObtainPairView
 from dj_rest_auth.registration.views import RegisterView
 from rest_framework import permissions
-from user.serializers import UserSerializer, UserDetailSerializer
-from rest_framework.parsers import MultiPartParser
+from user.serializers import UserSerializer
 
 class CustomRegisterView(RegisterView):
     serializer_class = UserSerializer
@@ -50,9 +49,7 @@ class ConfirmEmailView(APIView):
 class UserDetailView(APIView):
     def get(self, request, user_id):
         user = User.objects.get(id=user_id)
-        serializer = UserSerializer(user)
-        point = UserPointSerializer(user)
-        return Response({'user':serializer.data, 'point':point.data})
+        return Response('my page')
     
     # 회원 포인트 충전
     def patch(self, request, user_id):
@@ -63,21 +60,20 @@ class UserDetailView(APIView):
             serialize = UserPointSerializer(user, data={'point': request.data['point'] + user.point})
             if serialize.is_valid():
                 serialize.save()
-                return Response({'message':'충전완료'}, status=status.HTTP_200_OK)
+            return Response({'message':'충전완료'}, status=status.HTTP_200_OK)
         else:
             return Response({'error':'권한이 없습니다.'}, status=status.HTTP_400_BAD_REQUEST)
 
     # 회원정보 수정
-    def put(self, request, user_id):      
+    def put(self, request, user_id):
         user = get_object_or_404(User, id=user_id)
         login = request.user
+        
         if login==user:
-            serialize = UserDetailSerializer(user, data=request.data)
+            serialize = UserSerializer(user, data=request.data)
             if serialize.is_valid():
                 serialize.save()
-                return Response(serialize.data, status=status.HTTP_200_OK)
-            else:
-                return Response(serialize.errors)
+            return Response({'message':'수정완료'}, status=status.HTTP_200_OK)
         else:
             return Response({'error':'권한이 없습니다.'}, status=status.HTTP_400_BAD_REQUEST)
 

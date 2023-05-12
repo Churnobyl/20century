@@ -48,14 +48,11 @@ class ArticleView(APIView):
     def get(self, request):
         articles = Article.objects.all().order_by('-created_at')
         page = self.paginate_queryset(articles)
-        bids = Bid.objects.all()
-        article_serializer = ArticleCreateSerializer(articles, many=True)
-        bid_serializer = BidCreateSerializer(bids, many=True)
         if page is not None:
             serializer = self.get_paginated_response(self.serializer_class(page, many=True).data)
         else:
             serializer = self.serializer_class(articles, many=True)
-        return Response({'article': serializer.data, 'bid': bid_serializer.data, 'article2':article_serializer.data}, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
         article_serializer = ArticleCreateSerializer(data=request.data)
