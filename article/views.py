@@ -109,6 +109,7 @@ class ArticleDetailView(APIView):
         elif article_id in ['A','B','C','D']:
             articles = Article.objects.filter(category=article_id).order_by('-created_at')
             articles2 = Article.objects.filter(category=article_id).order_by('-created_at')
+            print(articles2)
             page = self.paginate_queryset(articles)
             serializer = ArticleSerializer(articles, many=True)
             serializer2 = ArticleSerializer(articles2, many=True)
