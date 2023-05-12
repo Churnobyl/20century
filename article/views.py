@@ -56,14 +56,13 @@ class ArticleView(APIView):
         self.check_bidding_end()
         articles = Article.objects.all().order_by('-created_at')
         page = self.paginate_queryset(articles)
-        bids = Bid.objects.all()
-        article_serializer = ArticleCreateSerializer(articles, many=True)
-        bid_serializer = BidCreateSerializer(bids, many=True)
+        serializer = ArticleCreateSerializer(articles, many=True)
+        serializer2 = ArticleSerializer(articles, many=True)
         if page is not None:
             serializer = self.get_paginated_response(self.serializer_class(page, many=True).data)
         else:
             serializer = self.serializer_class(articles, many=True)
-        return Response({'article': serializer.data, 'bid': bid_serializer.data, 'article2':article_serializer.data}, status=status.HTTP_200_OK)
+        return Response({'article': serializer.data, 'article2': serializer2.data}, status=status.HTTP_200_OK)
     
     def post(self, request):
         # 경매종료시간 finished_at의 request를 정수형으로 받고 현재시간에 더해서 저장
@@ -77,16 +76,53 @@ class ArticleView(APIView):
         
         
 class ArticleDetailView(APIView):
+    pagination_class = ArticlePagination
+    serializer_class = ArticleSerializer
+    @property
+    def paginator(self):
+        if not hasattr(self, '_paginator'):
+            if self.pagination_class is None:
+                self._paginator = None
+            else:
+                self._paginator = self.pagination_class()
+        else:
+            pass
+        return self._paginator
+    
+    def paginate_queryset(self, queryset):
+        
+        if self.paginator is None:
+            return None
+        return self.paginator.paginate_queryset(queryset,
+                   self.request, view=self)
+        
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+    
+    
     def get(self, request, article_id):
-        article = get_object_or_404(Article, id=article_id)
-        if request.user == article.user:
+        if type(article_id) == int:
+            article = get_object_or_404(Article, id=article_id)
             serializer = ArticleSerializer(article)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+        elif article_id in ['A','B','C','D']:
+            articles = Article.objects.filter(category=article_id).order_by('-created_at')
+            articles2 = Article.objects.filter(category=article_id).order_by('-created_at')
+            page = self.paginate_queryset(articles)
+            serializer = ArticleSerializer(articles, many=True)
+            serializer2 = ArticleSerializer(articles2, many=True)
+            if page is not None:
+                serializer = self.get_paginated_response(self.serializer_class(page, many=True).data)
+            else:
+                serializer = self.serializer_class(articles, many=True)
+            return Response({'article':serializer.data, 'article2':serializer2.data}, status=status.HTTP_200_OK)
 
     def patch(self, request, article_id):
         article = get_object_or_404(Article, id=article_id)
+        print(article.user)
+        print(request.user)
+
         if request.user == article.user:
             serializer = ArticleUpdateSerializer(article, data=request.data)
             if serializer.is_valid():
@@ -97,6 +133,14 @@ class ArticleDetailView(APIView):
         else:
             return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
         
+    def delete(self, request, article_id):
+        article = get_object_or_404(Article, id=article_id)
+        if request.user == article.user:
+            article.delete()
+            return Response({'message':'삭제 완료'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error':'권한이 없습니다!'}, status=status.HTTP_401_UNAUTHORIZED)
+
 class BiddingView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def patch(self, request, article_id):
@@ -161,7 +205,7 @@ class CommentDetailView(APIView):
             if serializer.is_valid():
                 serializer.save(user=request.user, article=article)
                 return Response({'message':'댓글 수정 완료'}, status=status.HTTP_200_OK)
-            else:    
+            else:
                 return Response({'error':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error':'권한이 없습니다!'}, status=status.HTTP_401_UNAUTHORIZED)
