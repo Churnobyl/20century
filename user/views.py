@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from article.models import Article
+from article.serializers import ArticleSerializer
 from user.serializers import UserSerializer, FollowSerializer, UserPointSerializer, CustomTokenObtainPairSerializer
 from rest_framework.generics import get_object_or_404
 from user.models import User
@@ -10,7 +12,8 @@ from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
 from rest_framework_simplejwt.views import TokenObtainPairView
 from dj_rest_auth.registration.views import RegisterView
 from rest_framework import permissions
-from user.serializers import UserSerializer
+from user.serializers import UserSerializer, UserDetailSerializer
+from rest_framework.parsers import MultiPartParser
 
 class CustomRegisterView(RegisterView):
     serializer_class = UserSerializer
@@ -47,9 +50,32 @@ class ConfirmEmailView(APIView):
  
  
 class UserDetailView(APIView):
+    # 유저 정보 조회
     def get(self, request, user_id):
+        # 내 정보 가져오기
         user = User.objects.get(id=user_id)
-        return Response('my page')
+        user_serializer = UserSerializer(user)
+        point = UserPointSerializer(user)
+        # 입찰
+        bid_article = Article.objects.filter(max_user_id=user_id).order_by('-finished_at')
+        bid_serializer = ArticleSerializer(bid_article, many=True)
+        
+        # user = request.user
+        # bookmark = Article.objects.all()
+        # book_serializer = BookmarkSerializer(bookmark, many=True).data
+        
+        # 찜 목록 : 최신순 (id)
+        # 제가 조회해서 들어간 user_id가지고 -> 이 사람이 북마크한 글을 끌어와야함
+        # ArticleSerializer로 게시글 형태 보내야 해요.
+        # user = request.user
+        # bookmark_article = user.bookmark.filter(user_id=user.id).order_by('-id')
+        # print(bookmark_article)
+        # bookmark_serializer = BookmarkSerializer(bookmark_article, many=True)
+
+        # print(bookmark_serializer.data)
+
+        # user.bookmarked.filter(user_id=feed.user.id)[0].image_url 
+        return Response({'user':user_serializer.data, 'point':point.data, 'bid_user':bid_serializer.data, 'bookmark':bookmark_serializer.data})
     
     # 회원 포인트 충전
     def patch(self, request, user_id):
@@ -60,20 +86,21 @@ class UserDetailView(APIView):
             serialize = UserPointSerializer(user, data={'point': request.data['point'] + user.point})
             if serialize.is_valid():
                 serialize.save()
-            return Response({'message':'충전완료'}, status=status.HTTP_200_OK)
+                return Response({'message':'충전완료'}, status=status.HTTP_200_OK)
         else:
             return Response({'error':'권한이 없습니다.'}, status=status.HTTP_400_BAD_REQUEST)
 
     # 회원정보 수정
-    def put(self, request, user_id):
+    def put(self, request, user_id):      
         user = get_object_or_404(User, id=user_id)
         login = request.user
-        
         if login==user:
-            serialize = UserSerializer(user, data=request.data)
+            serialize = UserDetailSerializer(user, data=request.data)
             if serialize.is_valid():
                 serialize.save()
-            return Response({'message':'수정완료'}, status=status.HTTP_200_OK)
+                return Response(serialize.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serialize.errors)
         else:
             return Response({'error':'권한이 없습니다.'}, status=status.HTTP_400_BAD_REQUEST)
 
