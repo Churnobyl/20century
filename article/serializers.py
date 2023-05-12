@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from article.models import Article, Comment, Bid
+from article.models import Article, Comment
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -11,7 +11,22 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = "__all__"
+        fields = [
+            'id',
+            'user',
+            'title',
+            'content',
+            'created_at',
+            'updated_at',
+            'finished_at',
+            'category',
+            'product',
+            'progress',
+            'max_user',
+            'max_point',
+            'image',
+            'bookmarked',
+        ]
 
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
@@ -20,13 +35,13 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ["title", "content", "finished_at",
-                  "category", "product", "image"]
+                  "category", "product", "image", "max_point"]
 
 
 class ArticleUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ["title", "content", "category"]
+        fields = ["product_title", "product_category", "product_content"]
 
 
 class ArticleListSerializer(serializers.ModelSerializer):
@@ -38,24 +53,6 @@ class ArticleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ["title", "user", "finished_at", "product"]
-
-
-# class ProductSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Product
-#         fields = "__all__"
-
-
-# class ProductUpdateSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Product
-#         fields = ["progress"]
-
-
-class BidCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Bid
-        fields = "__all__"
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
@@ -72,3 +69,10 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ["content",]
+
+
+class BiddingSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Article
+        fields = ['id', 'max_user', 'max_point']

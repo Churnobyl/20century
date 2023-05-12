@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from article.models import Article
-from article.serializers import ArticleSerializer
+from article.serializers import ArticleSerializer, ArticleCreateSerializer
 from user.serializers import UserSerializer, FollowSerializer, UserPointSerializer, CustomTokenObtainPairSerializer
 from rest_framework.generics import get_object_or_404
 from user.models import User
@@ -12,7 +12,7 @@ from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
 from rest_framework_simplejwt.views import TokenObtainPairView
 from dj_rest_auth.registration.views import RegisterView
 from rest_framework import permissions
-from user.serializers import UserSerializer, UserDetailSerializer
+from user.serializers import UserSerializer, UserDetailSerializer, UserDetailDetailSerializer
 from rest_framework.parsers import MultiPartParser
 
 class CustomRegisterView(RegisterView):
@@ -51,31 +51,24 @@ class ConfirmEmailView(APIView):
  
 class UserDetailView(APIView):
     # 유저 정보 조회
-    def get(self, request, user_id):
+    def get(self, request, user_id=None):
         # 내 정보 가져오기
         user = User.objects.get(id=user_id)
-        user_serializer = UserSerializer(user)
-        point = UserPointSerializer(user)
+        user_serializer = UserDetailDetailSerializer(user)
+
         # 입찰
         bid_article = Article.objects.filter(max_user_id=user_id).order_by('-finished_at')
         bid_serializer = ArticleSerializer(bid_article, many=True)
         
-        # user = request.user
-        # bookmark = Article.objects.all()
-        # book_serializer = BookmarkSerializer(bookmark, many=True).data
-        
         # 찜 목록 : 최신순 (id)
-        # 제가 조회해서 들어간 user_id가지고 -> 이 사람이 북마크한 글을 끌어와야함
-        # ArticleSerializer로 게시글 형태 보내야 해요.
-        # user = request.user
-        # bookmark_article = user.bookmark.filter(user_id=user.id).order_by('-id')
-        # print(bookmark_article)
-        # bookmark_serializer = BookmarkSerializer(bookmark_article, many=True)
+        # 북마크 DB의 user_id를 조회해서
+        # article_id 가져와야함
+        
+        users_bookmark = user.bookmark.all()
+        book_serializer = ArticleSerializer(users_bookmark, many=True)
 
-        # print(bookmark_serializer.data)
 
-        # user.bookmarked.filter(user_id=feed.user.id)[0].image_url 
-        return Response({'user':user_serializer.data, 'point':point.data, 'bid_user':bid_serializer.data, 'bookmark':bookmark_serializer.data})
+        return Response({'user':user_serializer.data, 'bid_article':bid_serializer.data, 'book':book_serializer.data},status=status.HTTP_200_OK)
     
     # 회원 포인트 충전
     def patch(self, request, user_id):
