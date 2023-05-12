@@ -11,7 +11,22 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = "__all__"
+        fields = [
+            'id',
+            'user',
+            'title',
+            'content',
+            'created_at',
+            'updated_at',
+            'finished_at',
+            'category',
+            'product',
+            'progress',
+            'max_user',
+            'max_point',
+            'image',
+            'bookmarked',
+        ]
 
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
@@ -20,13 +35,13 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ["title", "content", "finished_at",
-                  "category", "product", "image"]
+                  "category", "product", "image", "max_point"]
 
 
 class ArticleUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ["title", "content", "category"]
+        fields = ["product_title", "product_category", "product_content"]
 
 
 class ArticleListSerializer(serializers.ModelSerializer):
