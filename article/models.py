@@ -37,6 +37,7 @@ class Article(models.Model):
     product = models.CharField(max_length=100)
     progress = models.BooleanField(default=True)
     max_user = models.ForeignKey(User, null=True, default=None, on_delete=models.DO_NOTHING,related_name="max_user")
+    max_point = models.IntegerField(default=0)
     
     # 아티클
     image = models.ImageField(null=True, upload_to=rename_imagefile_to_uuid, verbose_name="제품 사진")
@@ -46,26 +47,6 @@ class Article(models.Model):
 
     def __str__(self):
         return str(self.title)
-    
-
-# class Product(models.Model):
-#     class Meta:
-#         db_table = "product"
-        
-#     name = models.CharField(max_length=100)
-#     progress = models.BooleanField(default=True)
-
-#     def __str__(self):
-#         return str(self.name)
-    
-    
-class Bid(models.Model):
-    class Meta:
-        db_table = "bid"
-    
-    article = models.ForeignKey(Article, null=True, on_delete=models.PROTECT)
-    user = models.ForeignKey(User, null=True, on_delete=models.PROTECT)
-    max_point = models.IntegerField(default=0)
     
 
 class Comment(models.Model):

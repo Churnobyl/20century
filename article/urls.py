@@ -1,7 +1,5 @@
 from django.urls import path
 from article import views
-from django.conf import settings
-from django.conf.urls.static import static
 
 urlpatterns = [
     path("", views.ArticleView.as_view(), name="article_view"),
@@ -22,6 +20,9 @@ urlpatterns = [
         views.CommentDetailView.as_view(),
         name="comment_detail_view",
     ),
+    path(
+        "<int:article_id>/bid/",
+        views.BiddingView.as_view(),
+        name="bidding_view",
+    ),
 ]
-
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

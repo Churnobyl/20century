@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from article.models import Article, Comment, Bid
+from article.models import Article, Comment
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -40,24 +40,6 @@ class ArticleListSerializer(serializers.ModelSerializer):
         fields = ["title", "user", "finished_at", "product"]
 
 
-# class ProductSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Product
-#         fields = "__all__"
-
-
-# class ProductUpdateSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Product
-#         fields = ["progress"]
-
-
-class BidCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Bid
-        fields = "__all__"
-
-
 class BookmarkSerializer(serializers.ModelSerializer):
     bookmarked = serializers.StringRelatedField(many=True)
 
@@ -72,3 +54,10 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ["content",]
+
+
+class BiddingSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Article
+        fields = ['id', 'max_user', 'max_point']
