@@ -65,10 +65,7 @@ class ArticleView(APIView):
             bid_serializer.save()
             return Response({'article': article_serializer.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
         else:
-            errors = {}
-            errors.update(article_serializer.errors)
-            errors.update(bid_serializer.errors)
-            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(article_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         
 class ArticleDetailView(APIView):
@@ -148,28 +145,3 @@ class CommentDetailView(APIView):
             return Response({'message':'댓글 삭제 완료'}, status=status.HTTP_200_OK)
         else:
             return Response({'error':'권한이 없습니다!'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        
-        
-# def close_auction():
-#     time_zone = pytz.timezone('Asia/Seoul')
-#     current_time = datetime.now(time_zone)
-#     articles = Article.objects.all()
-#     response_data = []
-    
-#     for article in articles:
-#         if article.finished_at > current_time:
-#             pk = article.id
-#             product = get_object_or_404(Product, id=pk)
-#             serializer = ProductUpdateSerializer(product)
-#             if serializer.is_valid():
-#                 product.progress = False
-#                 serializer.save()
-#                 response_data.append(serializer.data)
-#             else:
-#                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-#     if response_data:
-#         return Response(response_data, status=status.HTTP_200_OK)
-#     else:
-#         return Response({"message": "종료된 경매가 없습니다."}, status=status.HTTP_200_OK)
