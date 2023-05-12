@@ -52,6 +52,17 @@ class UserPointSerializer(serializers.ModelSerializer):
         model = User
         fields = ['point',]
 
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username','profile_image',]
+    
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get("username", instance.username)
+        instance.profile_image = validated_data.get("profile_image", instance.profile_image)
+        instance.save()
+        return instance
+
 
 class FollowSerializer(serializers.ModelSerializer):
     followers = serializers.StringRelatedField(many=True)
