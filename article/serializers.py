@@ -40,6 +40,12 @@ class ArticleListSerializer(serializers.ModelSerializer):
         fields = ["title", "user", "finished_at", "product"]
 
 
+class CloseAuctionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = ["progress"]
+
+
 # class ProductSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Product

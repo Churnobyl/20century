@@ -69,7 +69,7 @@ INSTALLED_APPS = [
     'rest_framework',
 
     # 'django_crontab',
-    # "django_apscheduler",
+    "django_apscheduler",
     
     'django.contrib.sites',
     'allauth',
@@ -223,6 +223,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 # ]
 
 
-# APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
-# APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
-# SCHEDULER_DEFAULT = True
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
+SCHEDULER_DEFAULT = True
