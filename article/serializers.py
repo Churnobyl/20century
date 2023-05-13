@@ -64,6 +64,12 @@ class BidCreateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class BiddingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bid
+        fields = ["user", "max_point"]
+
+
 class BookmarkSerializer(serializers.ModelSerializer):
     bookmarked = serializers.StringRelatedField(many=True)
 

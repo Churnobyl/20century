@@ -3,18 +3,21 @@ from rest_framework.views import APIView
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from article.models import Article, Comment, Bid
+from user.models import User
 from article.serializers import (
     ArticleSerializer,
     ArticleListSerializer,
     ArticleCreateSerializer,
     ArticleUpdateSerializer,
     CommentSerializer,
-    BidCreateSerializer
+    BookmarkSerializer,
+    BidCreateSerializer,
+    BiddingSerializer
 )
-from article.serializers import BookmarkSerializer
+from user.serializers import UserPointSerializer
 from rest_framework.pagination import PageNumberPagination
 import pytz
-import datetime
+from datetime import datetime
 
 class ArticlePagination(PageNumberPagination):
     page_size = 6
@@ -55,17 +58,24 @@ class ArticleView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
-        article_serializer = ArticleCreateSerializer(data=request.data)
-        bid_serializer = BidCreateSerializer(data=request.data)
-        if article_serializer.is_valid() and bid_serializer.is_valid():
-            article_serializer.save(user=request.user)
-            article_id = article_serializer.instance.id
-            article = get_object_or_404(Article, id=article_id)
-            bid_serializer.validated_data['article'] = article
-            bid_serializer.save()
-            return Response({'article': article_serializer.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
+        time_zone = pytz.timezone('Asia/Seoul')
+        current_time = datetime.now(time_zone)
+        date_format = '%Y-%m-%d %H:%M:%S'
+        finished_at = datetime.strptime(request.data['finished_at'], date_format).replace(tzinfo=time_zone)
+        if finished_at < current_time:
+            return Response({"message":"경매 종료시간은 현재시간 이후로 설정해주세요."}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(article_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            article_serializer = ArticleCreateSerializer(data=request.data)
+            bid_serializer = BidCreateSerializer(data=request.data)
+            if article_serializer.is_valid() and bid_serializer.is_valid():
+                article_serializer.save(user=request.user)
+                article_id = article_serializer.instance.id
+                article = get_object_or_404(Article, id=article_id)
+                bid_serializer.validated_data['article'] = article
+                bid_serializer.save()
+                return Response({'article': article_serializer.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response(article_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         
 class ArticleDetailView(APIView):
@@ -89,6 +99,34 @@ class ArticleDetailView(APIView):
         else:
             return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
         
+
+class Bidding(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def patch(self, request, article_id):
+        article = get_object_or_404(Article, id=article_id)
+        bid = get_object_or_404(Bid,id=article_id)
+        if article.user == request.user:
+            return Response({"message":"게시자는 경매에 참여할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        elif bid.user == request.user:
+            return Response({'message': "최고입찰자가 재입찰 할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)        
+        elif bid.max_point >= int(request.data['max_point']):
+            return Response({'message': "최고가보다 낮은 금액으로 입찰할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        elif request.user.point < int(request.data['max_point']):
+            return Response({"message":"포인트가 부족합니다."}, status=status.HTTP_400_BAD_REQUEST)
+        else:            
+            serializer = BiddingSerializer(bid, data=request.data)
+            if serializer.is_valid():
+                if bid.user:
+                    bid.user.point += bid.max_point
+                    bid.user.save()
+                request.user.point -= int(request.data['max_point'])
+                request.user.save()
+                serializer.save(user=request.user, max_point=request.data['max_point'])
+                return Response(serializer.data)
+            else:
+                return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+            
         
 class BookmarkView(APIView):
     def get(self, request, article_id):

@@ -22,6 +22,7 @@ urlpatterns = [
         views.CommentDetailView.as_view(),
         name="comment_detail_view",
     ),
+    path("<int:article_id>/bid/", views.Bidding.as_view(), name="bidding"),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
