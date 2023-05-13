@@ -26,6 +26,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             'max_point',
             'image',
             'bookmarked',
+            'user_id',
         ]
 
 
@@ -41,7 +42,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
 class ArticleUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ["product_title", "product_category", "product_content"]
+        fields = ["product", "category", "content"]
 
 
 class ArticleListSerializer(serializers.ModelSerializer):
@@ -52,7 +53,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ["title", "user", "finished_at", "product"]
+        fields = ["title", "user", "finished_at", "product",'progress', "max_point", "id", "image", 'bookmarked',]
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
@@ -66,6 +67,12 @@ class BookmarkSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = "__all__"
+        
+
+class CommentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ["content",]
