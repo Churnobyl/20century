@@ -39,6 +39,7 @@ EMAIL_USE_TLS = True # TLS 보안 방법
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 URL_FRONT = 'http://localhost:8000/' # 공개적인 웹페이지가 있다면 등록
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True # 유저가 받은 링크를 클릭하면 회원가입 완료되게끔
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 # ACCOUNT_EMAIL_VERIFICATION = "none"
@@ -49,7 +50,7 @@ ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[20 Century]"
 SITE_ID = 1
 
-
+REST_USE_JWT = True
 
 
 # Application definition
@@ -65,19 +66,22 @@ INSTALLED_APPS = [
     'user',
     'article',
 
-    'rest_framework.authtoken',
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    
 
-    # 'django_crontab',
     "django_apscheduler",
     
+    
     'django.contrib.sites',
+    'rest_auth',
+    'rest_auth.registration',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'rest_auth',
-    'rest_auth.registration',
-    'rest_framework_simplejwt',
+    'allauth.socialaccount.providers.kakao',
+    
 ]
 
 REST_FRAMEWORK = {
