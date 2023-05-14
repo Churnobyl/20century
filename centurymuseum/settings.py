@@ -68,7 +68,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework',
 
-    # 'django_crontab',
     "django_apscheduler",
     
     'django.contrib.sites',

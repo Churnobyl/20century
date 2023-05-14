@@ -47,17 +47,6 @@ class Article(models.Model):
     def __str__(self):
         return str(self.title)
     
-
-# class Product(models.Model):
-#     class Meta:
-#         db_table = "product"
-        
-#     name = models.CharField(max_length=100)
-#     progress = models.BooleanField(default=True)
-
-#     def __str__(self):
-#         return str(self.name)
-    
     
 class Bid(models.Model):
     class Meta:
