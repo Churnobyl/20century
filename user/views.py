@@ -1,8 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from article.models import Article
-from article.serializers import ArticleSerializer, ArticleCreateSerializer
+from article.models import Article, Bid
+from article.serializers import ArticleSerializer, BiddingSerializer, BiddingArticleSerializer
 from user.serializers import UserSerializer, FollowSerializer, UserPointSerializer, CustomTokenObtainPairSerializer
 from rest_framework.generics import get_object_or_404
 from user.models import User
@@ -51,7 +51,7 @@ class ConfirmEmailView(APIView):
                 # A React Router Route will handle the failure scenario
                 return HttpResponseRedirect('/') # 인증실패
         return email_confirmation
-
+ 
     def get_queryset(self):
         qs = EmailConfirmation.objects.all_valid()
         qs = qs.select_related("email_address__user")
@@ -101,9 +101,10 @@ class UserDetailView(APIView):
         user = User.objects.get(id=user_id)
         user_serializer = UserDetailDetailSerializer(user)
 
-        # 입찰
-        bid_article = Article.objects.filter(max_user_id=user_id).order_by('-finished_at')
-        bid_serializer = ArticleSerializer(bid_article, many=True)
+        # 입찰웨않뒈?
+        bids = Bid.objects.filter(max_user=user_id)
+        bid_serializer = BiddingArticleSerializer(bids, many=True)
+            
         
         # 찜 목록 : 최신순 (id)
         # 북마크 DB의 user_id를 조회해서
@@ -111,9 +112,9 @@ class UserDetailView(APIView):
         
         users_bookmark = user.bookmark.all()
         book_serializer = ArticleSerializer(users_bookmark, many=True)
+        
 
-
-        return Response({'user':user_serializer.data, 'bid_article':bid_serializer.data, 'book':book_serializer.data},status=status.HTTP_200_OK)
+        return Response({'user':user_serializer.data, 'book':book_serializer.data, 'bid_article': bid_serializer.data},status=status.HTTP_200_OK)
     
     # 회원 포인트 충전
     def patch(self, request, user_id):
