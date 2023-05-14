@@ -36,7 +36,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ["title", "content", "finished_at",
-                  "category", "product", "image", "max_point"]
+                  "category", "product", "image", "max_user", "max_point"]
 
 
 class ArticleUpdateSerializer(serializers.ModelSerializer):
