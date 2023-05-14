@@ -14,6 +14,15 @@ from dj_rest_auth.registration.views import RegisterView
 from rest_framework import permissions
 from user.serializers import UserSerializer, UserDetailSerializer, UserDetailDetailSerializer
 from rest_framework.parsers import MultiPartParser
+# 카카오
+import os
+import requests
+from django.shortcuts import redirect
+from django.http import JsonResponse
+from json import JSONDecodeError
+from dj_rest_auth.registration.views import SocialLoginView
+from allauth.socialaccount.providers.kakao import views as kakao_view
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 
 class CustomRegisterView(RegisterView):
     serializer_class = UserSerializer
@@ -47,6 +56,42 @@ class ConfirmEmailView(APIView):
         qs = EmailConfirmation.objects.all_valid()
         qs = qs.select_related("email_address__user")
         return qs
+    
+
+# 카카오 로그인
+BASE_URL = 'http://127.0.0.1:8000/'
+KAKAO_CALLBACK_URI = BASE_URL + 'api/user/kakao/callback/'
+
+def kakao_login(request):
+    client_id = os.environ.get("SOCIAL_AUTH_KAKAO_CLIENT_ID")
+    return redirect(f"https://kauth.kakao.com/oauth/authorize?client_id={client_id}&redirect_uri={KAKAO_CALLBACK_URI}&response_type=code&scope=account_email")
+
+def kakao_callback(request):
+    code = request.GET.get("code")
+    token_api = 'https://kauth.kakao.com/oauth/token'
+    client_id = os.environ.get("SOCIAL_AUTH_KAKAO_CLIENT_ID")
+
+    data = {
+        'grant_type' : 'authorization_code',
+        'client_id' : client_id,
+        'redirection_uri': KAKAO_CALLBACK_URI,
+        'code': code,
+    }
+
+    token_response = requests.post(token_api, data=data)
+    access_token = token_response.json().get('access_token')
+
+    user_request = requests.post('https://kapi.kakao.com/v2/user/me', headers={"Authorization": f'Bearer ${access_token}'})
+    user_json = user_request.json()
+
+
+    return JsonResponse({"Id token": user_json["id"],"Code": data["client_id"], 'Access token':access_token})
+
+
+class KakaoLogin(SocialLoginView):
+    adapter_class = kakao_view.KakaoOAuth2Adapter
+    callback_url = KAKAO_CALLBACK_URI
+    client_class = OAuth2Client
  
  
 class UserDetailView(APIView):
