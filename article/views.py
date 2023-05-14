@@ -155,7 +155,6 @@ class Bidding(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def patch(self, request, article_id):
-        print(request.user)
         time_zone = pytz.timezone('Asia/Seoul')
         current_time = datetime.now(time_zone)
         article = get_object_or_404(Article,id=article_id)
@@ -176,11 +175,14 @@ class Bidding(APIView):
                 if bid.max_user:
                     bid.max_user.point += bid.max_point
                     bid.max_user.save()
-                    logging.warning(f"입찰금액 반환  //  게시글 id : {article_id}  //  상품 : {article.product}  //  패찰자 id : {bid.max_user.id}  //  패찰자 username : {bid.max_user}  //  반환금액 : {bid.max_point}")
+                    logging.critical(f"입찰금액 반환  //  게시글 id : {article_id}  //  상품 : {article.product}  //  패찰자 id : {bid.max_user.id}  //  패찰자 username : {bid.max_user}  //  반환금액 : {bid.max_point}")
                 request.user.point -= int(request.data['max_point'])
                 request.user.save()
                 serializer.save(max_user=request.user, max_point=request.data['max_point'])
-                logging.warning(f"상회입찰  //  게시글 id : {article_id}  //  상품 : {article.product}  //  입찰자 id : {request.user.id}  //  입찰자 username : {request.user}  //  입찰금액 : {request.data['max_point']}")
+                bid.article.max_user = request.user
+                bid.article.max_point = request.data['max_point']
+                bid.article.save()
+                logging.critical(f"상회입찰  //  게시글 id : {article_id}  //  상품 : {article.product}  //  입찰자 id : {request.user.id}  //  입찰자 username : {request.user}  //  입찰금액 : {request.data['max_point']}")
                 return Response(serializer.data)
             else:
                 return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
