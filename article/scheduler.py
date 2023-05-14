@@ -47,6 +47,8 @@ def close_auction():
                     close_article_list += [article_id]
                 else:
                     bid.delete()
+
+                logging.warning(f"경매결과  //  경매 id : {article_id}  //  상품 : {article.product}  //  낙찰자 : {article.max_user}  //  낙찰금액 : {article.max_point}")
                     
     if close_count > 0:
-        logging.warning(f"종료된 경매 수 : {close_count}  //  종료된 경매 id : {close_article_list}  //  시간 : {current_time}")
+        logging.warning(f"경매종료 집계  //  종료된 경매 수 : {close_count}  //  종료된 경매 id : {close_article_list}  //  시간 : {current_time}")
