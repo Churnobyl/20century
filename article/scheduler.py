@@ -7,7 +7,7 @@ import pytz
 import logging
 
 
-logging.basicConfig(filename='auction.log', level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf-8')
+logging.basicConfig(filename='auction.log', level=logging.CRITICAL, format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf-8')
 
 
 def start():
@@ -41,12 +41,10 @@ def close_auction():
                     article.user.point += bid.max_point
                     article.user.save()
                     
-                    bid.delete()
-                    
-                    close_count += 1
-                    close_article_list += [article_id]
-                else:
-                    bid.delete()
+                bid.delete()
+                close_count += 1
+                close_article_list += [article_id]
+                logging.critical(f"경매결과  //  경매 id : {article_id}  //  상품 : {article.product}  //  낙찰자 : {article.max_user}  //  낙찰금액 : {article.max_point}")
                     
     if close_count > 0:
-        logging.warning(f"종료된 경매 수 : {close_count}  //  종료된 경매 id : {close_article_list}  //  시간 : {current_time}")
+        logging.critical(f"경매종료 집계  //  종료된 경매 수 : {close_count}  //  종료된 경매 id : {close_article_list}  //  시간 : {current_time}")
