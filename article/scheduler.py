@@ -44,7 +44,10 @@ def close_auction():
                 bid.delete()
                 close_count += 1
                 close_article_list += [article_id]
-                logging.critical(f"경매결과  //  경매 id : {article_id}  //  상품 : {article.product}  //  낙찰자 : {article.max_user}  //  낙찰금액 : {article.max_point}")
+                bid_amount = None
+                if article.max_user is not None:
+                    bid_amount = article.max_point
+                logging.critical(f"경매결과  //  경매 id : {article_id}  //  상품 : {article.product}  //  낙찰자 : {article.max_user}  //  낙찰금액 : {bid_amount}")
                     
     if close_count > 0:
         logging.critical(f"경매종료 집계  //  종료된 경매 수 : {close_count}  //  종료된 경매 id : {close_article_list}  //  시간 : {current_time}")
