@@ -9,6 +9,7 @@ from article.serializers import (
     ArticleCreateSerializer,
     ArticleUpdateSerializer,
     CommentSerializer,
+    CommentCreateSerializer,
     BiddingSerializer
 )
 from article.serializers import BookmarkSerializer
@@ -18,7 +19,7 @@ import datetime
 from django.utils import timezone
 
 class ArticlePagination(PageNumberPagination):
-    page_size = 6
+    page_size = 4
 
 
 class ArticleView(APIView):
@@ -51,10 +52,9 @@ class ArticleView(APIView):
         check_end_article = Article.objects.filter(finished_at__lte=timezone.now()).filter(progress=1)
         check_end_article.update(progress=0)
         
-    
     def get(self, request):
         self.check_bidding_end()
-        articles = Article.objects.all().order_by('-created_at')
+        articles = Article.objects.all().order_by('-created_at').order_by('-bookmarked')
         page = self.paginate_queryset(articles)
         serializer = ArticleCreateSerializer(articles, many=True)
         serializer2 = ArticleSerializer(articles, many=True)
@@ -105,7 +105,9 @@ class ArticleDetailView(APIView):
         if type(article_id) == int:
             article = get_object_or_404(Article, id=article_id)
             serializer = ArticleSerializer(article)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            comment = Comment.objects.filter(article_id=article_id).order_by('-created_at')
+            comment_serializer = CommentSerializer(comment, many=True)
+            return Response({'article':serializer.data, 'comment':comment_serializer.data}, status=status.HTTP_200_OK)
         elif article_id in ['A','B','C','D']:
             articles = Article.objects.filter(category=article_id).order_by('-created_at')
             articles2 = Article.objects.filter(category=article_id).order_by('-created_at')
@@ -121,8 +123,6 @@ class ArticleDetailView(APIView):
 
     def patch(self, request, article_id):
         article = get_object_or_404(Article, id=article_id)
-        print(article.user)
-        print(request.user)
 
         if request.user == article.user:
             serializer = ArticleUpdateSerializer(article, data=request.data)
@@ -185,7 +185,7 @@ class CommentView(APIView):
 
     # 댓글 작성
     def post(self, request, article_id):
-        serializer = CommentSerializer(data=request.data)
+        serializer = CommentCreateSerializer(data=request.data)
         article = Article.objects.get(id=article_id)
         if serializer.is_valid():
             serializer.save(user=request.user, article=article)
@@ -202,7 +202,7 @@ class CommentDetailView(APIView):
         comment = get_object_or_404(Comment, id=comment_id, article_id=article_id)
         article = Article.objects.get(id=article_id)
         if request.user == comment.user:
-            serializer = CommentSerializer(comment, data=request.data)
+            serializer = CommentCreateSerializer(comment, data=request.data)
             if serializer.is_valid():
                 serializer.save(user=request.user, article=article)
                 return Response({'message':'댓글 수정 완료'}, status=status.HTTP_200_OK)
