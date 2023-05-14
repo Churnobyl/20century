@@ -179,6 +179,9 @@ class Bidding(APIView):
                 request.user.point -= int(request.data['max_point'])
                 request.user.save()
                 serializer.save(max_user=request.user, max_point=request.data['max_point'])
+                bid.article.max_user = request.user
+                bid.article.max_point = request.data['max_point']
+                bid.article.save()
                 logging.critical(f"상회입찰  //  게시글 id : {article_id}  //  상품 : {article.product}  //  입찰자 id : {request.user.id}  //  입찰자 username : {request.user}  //  입찰금액 : {request.data['max_point']}")
                 return Response(serializer.data)
             else:
