@@ -9,18 +9,20 @@ from article.serializers import (
     ArticleCreateSerializer,
     ArticleUpdateSerializer,
     CommentSerializer,
+    CommentCreateSerializer,
     BookmarkSerializer,
     BidCreateSerializer,
     BiddingSerializer
 )
 from rest_framework.pagination import PageNumberPagination
 import pytz
+from django.utils import timezone
 from datetime import datetime, timedelta
 import logging
 
 
 class ArticlePagination(PageNumberPagination):
-    page_size = 6
+    page_size = 4
 
 
 class ArticleView(APIView):
@@ -48,14 +50,17 @@ class ArticleView(APIView):
         assert self.paginator is not None
         return self.paginator.get_paginated_response(data)
     
+        
     def get(self, request):
-        articles = Article.objects.all().order_by('-created_at')
+        articles = Article.objects.all().order_by('-created_at').order_by('-bookmarked')
         page = self.paginate_queryset(articles)
+        serializer = ArticleCreateSerializer(articles, many=True)
+        serializer2 = ArticleSerializer(articles, many=True)
         if page is not None:
             serializer = self.get_paginated_response(self.serializer_class(page, many=True).data)
         else:
             serializer = self.serializer_class(articles, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'article': serializer.data, 'article2': serializer2.data}, status=status.HTTP_200_OK)
     
     def post(self, request):
         time_zone = pytz.timezone('Asia/Seoul')
@@ -79,16 +84,54 @@ class ArticleView(APIView):
         
         
 class ArticleDetailView(APIView):
-    def get(self, request, article_id):
-        article = get_object_or_404(Article, id=article_id)
-        if request.user == article.user:
-            serializer = ArticleSerializer(article)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    pagination_class = ArticlePagination
+    serializer_class = ArticleSerializer
+    @property
+    def paginator(self):
+        if not hasattr(self, '_paginator'):
+            if self.pagination_class is None:
+                self._paginator = None
+            else:
+                self._paginator = self.pagination_class()
         else:
-            return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+            pass
+        return self._paginator
+    
+    def paginate_queryset(self, queryset):
+        
+        if self.paginator is None:
+            return None
+        return self.paginator.paginate_queryset(queryset,
+                   self.request, view=self)
+        
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+    
+    
+    def get(self, request, article_id):
+        if type(article_id) == int:
+            article = get_object_or_404(Article, id=article_id)
+            serializer = ArticleSerializer(article)
+            comment = Comment.objects.filter(article_id=article_id).order_by('-created_at')
+            comment_serializer = CommentSerializer(comment, many=True)
+            return Response({'article':serializer.data, 'comment':comment_serializer.data}, status=status.HTTP_200_OK)
+        elif article_id in ['A','B','C','D']:
+            articles = Article.objects.filter(category=article_id).order_by('-created_at')
+            articles2 = Article.objects.filter(category=article_id).order_by('-created_at')
+            print(articles2)
+            page = self.paginate_queryset(articles)
+            serializer = ArticleSerializer(articles, many=True)
+            serializer2 = ArticleSerializer(articles2, many=True)
+            if page is not None:
+                serializer = self.get_paginated_response(self.serializer_class(page, many=True).data)
+            else:
+                serializer = self.serializer_class(articles, many=True)
+            return Response({'article':serializer.data, 'article2':serializer2.data}, status=status.HTTP_200_OK)
 
     def patch(self, request, article_id):
         article = get_object_or_404(Article, id=article_id)
+
         if request.user == article.user:
             serializer = ArticleUpdateSerializer(article, data=request.data)
             if serializer.is_valid():
@@ -99,6 +142,14 @@ class ArticleDetailView(APIView):
         else:
             return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
         
+    def delete(self, request, article_id):
+        article = get_object_or_404(Article, id=article_id)
+        if request.user == article.user:
+            article.delete()
+            return Response({'message':'삭제 완료'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error':'권한이 없습니다!'}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 class Bidding(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -155,7 +206,7 @@ class CommentView(APIView):
 
     # 댓글 작성
     def post(self, request, article_id):
-        serializer = CommentSerializer(data=request.data)
+        serializer = CommentCreateSerializer(data=request.data)
         article = Article.objects.get(id=article_id)
         if serializer.is_valid():
             serializer.save(user=request.user, article=article)
@@ -172,11 +223,11 @@ class CommentDetailView(APIView):
         comment = get_object_or_404(Comment, id=comment_id, article_id=article_id)
         article = Article.objects.get(id=article_id)
         if request.user == comment.user:
-            serializer = CommentSerializer(comment, data=request.data)
+            serializer = CommentCreateSerializer(comment, data=request.data)
             if serializer.is_valid():
                 serializer.save(user=request.user, article=article)
                 return Response({'message':'댓글 수정 완료'}, status=status.HTTP_200_OK)
-            else:    
+            else:
                 return Response({'error':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error':'권한이 없습니다!'}, status=status.HTTP_401_UNAUTHORIZED)

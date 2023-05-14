@@ -10,14 +10,12 @@ class UserSerializer(RegisterSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email',
-                  'username',
-                  'created_at',
-                  'updated_at',
-                  'profile_image',
-                  'password1',
-                  'password2',
-                  ]
+        fields = [
+            'email',
+            'profile_image',
+            'password1',
+            'password2',
+        ]
         # exclude = ['point', 'followings', ]
         extra_kwargs = {
             "password": {
@@ -51,6 +49,34 @@ class UserPointSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['point',]
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'profile_image',]
+
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get("username", instance.username)
+        instance.profile_image = validated_data.get(
+            "profile_image", instance.profile_image)
+        instance.save()
+        return instance
+
+
+class UserDetailDetailSerializer(RegisterSerializer, serializers.ModelSerializer):
+
+    profile_image = serializers.ImageField()
+
+    class Meta:
+        model = User
+        fields = '__all__'
+        # exclude = ['point', 'followings', ]
+        extra_kwargs = {
+            "password": {
+                "write_only": True,
+            },
+        }
 
 
 class FollowSerializer(serializers.ModelSerializer):
