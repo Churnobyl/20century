@@ -28,12 +28,12 @@ class Article(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     finished_at = models.DateTimeField()
     category_choice = [
-        ('A','일렉츄로닉'),
-        ('B','패숑'),
-        ('C','담금주'),
-        ('D','잡화')
+        (10001,'일렉츄로닉'),
+        (10002,'패숑'),
+        (10003,'담금주'),
+        (10004,'잡화')
     ]
-    category = models.CharField(choices=category_choice, max_length=1)
+    category = models.IntegerField(choices=category_choice)
     product = models.CharField(max_length=100)
     progress = models.BooleanField(default=True)
     max_user = models.ForeignKey(User, null=True, default=None, on_delete=models.DO_NOTHING,related_name="max_user")
@@ -54,7 +54,7 @@ class Bid(models.Model):
         db_table = "bid"
     
     article = models.ForeignKey(Article, null=True, on_delete=models.PROTECT, related_name="bid_article")
-    max_user = models.ForeignKey(User, null=True, on_delete=models.PROTECT, related_name="bid_user")
+    max_user = models.ForeignKey(User, null=True, on_delete=models.PROTECT)
     max_point = models.IntegerField(default=0)
     
 

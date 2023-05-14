@@ -4,6 +4,7 @@ from article.models import Article, Comment, Bid
 
 class ArticleSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
+    max_user = serializers.StringRelatedField()
     image = serializers.ImageField()
 
     def get_user(self, obj):

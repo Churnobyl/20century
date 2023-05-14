@@ -27,7 +27,7 @@ class ArticlePagination(PageNumberPagination):
 
 class ArticleView(APIView):
     pagination_class = ArticlePagination
-    serializer_class = ArticleListSerializer
+    serializer_class = ArticleSerializer
     @property
     def paginator(self):
         if not hasattr(self, '_paginator'):
@@ -65,6 +65,7 @@ class ArticleView(APIView):
         return Response({'article': serializer.data, 'article2': serializer2.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
     
     def post(self, request):
+        print("12312312")
         time_zone = pytz.timezone('Asia/Seoul')
         current_time = datetime.now(time_zone) + timedelta(minutes=32)
         finished_at = datetime.fromisoformat(request.data['finished_at']).replace(tzinfo=time_zone)
@@ -111,25 +112,28 @@ class ArticleDetailView(APIView):
     
     
     def get(self, request, article_id):
-        if type(article_id) == int:
-            article = get_object_or_404(Article, id=article_id)
-            serializer = ArticleSerializer(article)
-            bid = get_object_or_404(Bid, article=article_id)
-            bid_serializer = BiddingSerializer(bid)
-            comment = Comment.objects.filter(article_id=article_id).order_by('-created_at')
-            comment_serializer = CommentSerializer(comment, many=True)
-            return Response({'article':serializer.data, 'comment':comment_serializer.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
-        elif article_id in ['A','B','C','D']:
+        if article_id in [10001,10002,10003,10004]:
+            print("asdaasdasdsadsdsad")
             articles = Article.objects.filter(category=article_id).order_by('-created_at')
             articles2 = Article.objects.filter(category=article_id).order_by('-created_at')
             page = self.paginate_queryset(articles)
             serializer = ArticleSerializer(articles, many=True)
             serializer2 = ArticleSerializer(articles2, many=True)
-            if page is not None:
-                serializer = self.get_paginated_response(self.serializer_class(page, many=True).data)
-            else:
-                serializer = self.serializer_class(articles, many=True)
+            # if page is not None:
+            #     serializer = self.get_paginated_response(self.serializer_class(page, many=True).data)
+            # else:
+            #     serializer = self.serializer_class(articles, many=True)
             return Response({'article':serializer.data, 'article2':serializer2.data}, status=status.HTTP_200_OK)
+        else:
+            print("asdasdsad")
+            article = get_object_or_404(Article, id=article_id)
+            serializer = ArticleSerializer(article)
+            bid = get_object_or_404(Article, id=article_id)
+            bid_serializer = BiddingSerializer(bid)
+            comment = Comment.objects.filter(article_id=article_id).order_by('-created_at')
+            comment_serializer = CommentSerializer(comment, many=True)
+            return Response({'article':serializer.data, 'comment':comment_serializer.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
+
 
     def patch(self, request, article_id):
         article = get_object_or_404(Article, id=article_id)

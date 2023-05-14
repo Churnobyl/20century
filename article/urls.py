@@ -8,11 +8,6 @@ urlpatterns = [
         views.ArticleDetailView.as_view(),
         name="article_detail_view",
     ),
-    path(
-        "<str:article_id>/",
-        views.ArticleDetailView.as_view(),
-        name="article_detail_view",
-    ),
     path("<int:article_id>/mark/",
          views.BookmarkView.as_view(), name="bookmark_view"),
     path(
