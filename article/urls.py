@@ -25,9 +25,5 @@ urlpatterns = [
         views.CommentDetailView.as_view(),
         name="comment_detail_view",
     ),
-    path(
-        "<int:article_id>/bid/",
-        views.BiddingView.as_view(),
-        name="bidding_view",
-    ),
+    path("<int:article_id>/bid/", views.Bidding.as_view(), name="bidding"),
 ]

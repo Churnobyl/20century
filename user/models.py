@@ -56,7 +56,7 @@ class User(AbstractBaseUser):
     username = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    point = models.PositiveIntegerField(default=0)
+    point = models.PositiveIntegerField(default=100000)
 
     # 팔로우
     followings = models.ManyToManyField('self', symmetrical=False, related_name="followers", blank=True, verbose_name="팔로워")
