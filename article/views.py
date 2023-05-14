@@ -104,15 +104,16 @@ class Bidding(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def patch(self, request, article_id):
+        print(request.user)
         time_zone = pytz.timezone('Asia/Seoul')
         current_time = datetime.now(time_zone)
         article = get_object_or_404(Article,id=article_id)
         bid = get_object_or_404(Bid,id=article_id)
         if bid.max_point >= int(request.data['max_point']):
-            return Response({'message': "최고가보다 낮은 금액으로 입찰할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': "현재 입찰가보다 높은 금액으로 입찰해야 합니다."}, status=status.HTTP_400_BAD_REQUEST)
         elif request.user.point < int(request.data['max_point']):
             return Response({"message":"포인트가 부족합니다."}, status=status.HTTP_400_BAD_REQUEST)
-        elif bid.user == request.user:
+        elif bid.max_user == request.user:
             return Response({'message': "최고입찰자가 재입찰 할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
         elif article.user == request.user:
             return Response({"message":"게시자는 경매에 참여할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
@@ -121,13 +122,14 @@ class Bidding(APIView):
         else:            
             serializer = BiddingSerializer(bid, data=request.data)
             if serializer.is_valid():
-                if bid.user:
-                    bid.user.point += bid.max_point
-                    bid.user.save()
+                if bid.max_user:
+                    bid.max_user.point += bid.max_point
+                    bid.max_user.save()
+                    logging.warning(f"입찰금액 반환  //  게시글 id : {article_id}  //  상품 : {article.product}  //  패찰자 id : {bid.max_user.id}  //  패찰자 username : {bid.max_user}  //  반환금액 : {bid.max_point}")
                 request.user.point -= int(request.data['max_point'])
                 request.user.save()
-                serializer.save(user=request.user, max_point=request.data['max_point'])
-                logging.warning(f"게시글 id : {article_id}  //  입찰자 id : {request.user.id}  //  입찰자 username : {request.user}  //  입찰금액 : {request.data['max_point']}")
+                serializer.save(max_user=request.user, max_point=request.data['max_point'])
+                logging.warning(f"상회입찰  //  게시글 id : {article_id}  //  상품 : {article.product}  //  입찰자 id : {request.user.id}  //  입찰자 username : {request.user}  //  입찰금액 : {request.data['max_point']}")
                 return Response(serializer.data)
             else:
                 return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)

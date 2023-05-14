@@ -49,7 +49,7 @@ class BidCreateSerializer(serializers.ModelSerializer):
 class BiddingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bid
-        fields = ["user", "max_point"]
+        fields = ["max_user", "max_point"]
 
 
 class BookmarkSerializer(serializers.ModelSerializer):

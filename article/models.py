@@ -37,6 +37,7 @@ class Article(models.Model):
     product = models.CharField(max_length=100)
     progress = models.BooleanField(default=True)
     max_user = models.ForeignKey(User, null=True, default=None, on_delete=models.DO_NOTHING,related_name="max_user")
+    max_point = models.IntegerField(null=True, default=None)
     
     # 아티클
     image = models.ImageField(null=True, upload_to=rename_imagefile_to_uuid, verbose_name="제품 사진")
@@ -53,7 +54,7 @@ class Bid(models.Model):
         db_table = "bid"
     
     article = models.ForeignKey(Article, null=True, on_delete=models.PROTECT)
-    user = models.ForeignKey(User, null=True, on_delete=models.PROTECT)
+    max_user = models.ForeignKey(User, null=True, on_delete=models.PROTECT)
     max_point = models.IntegerField(default=0)
     
 

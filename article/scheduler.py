@@ -31,9 +31,11 @@ def close_auction():
             bid_queryset = Bid.objects.filter(id=article_id)
             if bid_queryset.exists():
                 bid = bid_queryset.first()
-                max_bid_user = bid.user
+                max_bid_user = bid.max_user
+                max_point = bid.max_point
                 if max_bid_user is not None:
                     article.max_user = max_bid_user
+                    article.max_point = max_point
                     article.save()
                     
                     article.user.point += bid.max_point
