@@ -1,6 +1,7 @@
+<div align="center">
 <img src="https://capsule-render.vercel.app/api?type=waving&color=FBB1A1&height=200&section=header&text=%2020th%20Century%20Museum%20&fontSize=80&fontColor=ffffff"/>
 
-<div align="center">
+
 💌 Link 💌</br>
 <li>[Frontend](https://github.com/Churnobyl/20century_front)  </br>
 <li>[document](https://www.notion.so/A6-e4bb9ce7bae34da3a4280c243db4ce1f)  </br>
