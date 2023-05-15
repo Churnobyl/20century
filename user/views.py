@@ -37,7 +37,7 @@ class ConfirmEmailView(APIView):
         self.object = confirmation = self.get_object()
         confirmation.confirm(self.request)
         # A React Router Route will handle the failure scenario
-        return HttpResponseRedirect('/') # 인증성공
+        return HttpResponseRedirect('http://127.0.0.1:5500') # 인증성공
 
     def get_object(self, queryset=None):
         key = self.kwargs['key']
@@ -49,7 +49,7 @@ class ConfirmEmailView(APIView):
                 email_confirmation = queryset.get(key=key.lower())
             except EmailConfirmation.DoesNotExist:
                 # A React Router Route will handle the failure scenario
-                return HttpResponseRedirect('/') # 인증실패
+                return HttpResponseRedirect('http://127.0.0.1:5500') # 인증실패
         return email_confirmation
  
     def get_queryset(self):

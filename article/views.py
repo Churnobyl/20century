@@ -65,7 +65,6 @@ class ArticleView(APIView):
         return Response({'article': serializer.data, 'article2': serializer2.data, 'bid': bid_serializer.data}, status=status.HTTP_200_OK)
     
     def post(self, request):
-        print("12312312")
         time_zone = pytz.timezone('Asia/Seoul')
         current_time = datetime.now(time_zone) + timedelta(minutes=32)
         finished_at = datetime.fromisoformat(request.data['finished_at']).replace(tzinfo=time_zone)
@@ -113,7 +112,6 @@ class ArticleDetailView(APIView):
     
     def get(self, request, article_id):
         if article_id in [10001,10002,10003,10004]:
-            print("asdaasdasdsadsdsad")
             articles = Article.objects.filter(category=article_id).order_by('-created_at')
             articles2 = Article.objects.filter(category=article_id).order_by('-created_at')
             page = self.paginate_queryset(articles)
@@ -125,7 +123,6 @@ class ArticleDetailView(APIView):
             #     serializer = self.serializer_class(articles, many=True)
             return Response({'article':serializer.data, 'article2':serializer2.data}, status=status.HTTP_200_OK)
         else:
-            print("asdasdsad")
             article = get_object_or_404(Article, id=article_id)
             serializer = ArticleSerializer(article)
             bid = get_object_or_404(Article, id=article_id)
